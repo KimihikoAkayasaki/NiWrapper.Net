@@ -1,32 +1,27 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.12)
 
 project(NiWrapper_NiTE)
 
-set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH})
+file(GLOB NIWRAPPER_HDR "include/*.h")
+file(GLOB NIWRAPPER_SRC "src/*.cpp")
 
-find_package(NiTE2 REQUIRED)
+# ----------------------- OpenNI and NiTE ----------------------
+set(OPENNI_ROOT "${CMAKE_CURRENT_LIST_DIR}/../vendor/OpenNI")
+set(OPENNI_INCLUDE_DIR "${OPENNI_ROOT}/Include")
 
-set(NITEWRAPPER_SRC
-  Array.cpp
-  Common.cpp
-  GestureData.cpp
-  HandData.cpp
-  HandTracker.cpp
-  HandTrackerFrameRef.cpp
-  HandTracker_Listener.cpp
-  NiTE.cpp
-  PoseData.cpp
-  Skeleton.cpp
-  SkeletonJoint.cpp
-  UserData.cpp
-  UserMap.cpp
-  UserTracker.cpp
-  UserTrackerFrameRef.cpp
-  UserTracker_Listener.cpp
-  )
+link_directories("${OPENNI_ROOT}/Lib")
+link_directories("${OPENNI_ROOT}/Redist")
 
-# Changed to underscore, because library names with a "dot"
-# in them will not have .dll appended on Windows for DllImport()
-# decorators
-add_library(NiWrapper_NiTE SHARED ${NITEWRAPPER_SRC})
+set(NITE_ROOT "${CMAKE_CURRENT_LIST_DIR}/../vendor/NiTE")
+set(NITE_INCLUDE_DIR "${NITE_ROOT}/Include")
+
+link_directories("${NITE_ROOT}/Lib")
+link_directories("${NITE_ROOT}/Redist")
+# --------------------------------------------------------------
+
+add_library(NiWrapper_NiTE SHARED ${NIWRAPPER_SRC} ${NIWRAPPER_HDR})
+
+target_include_directories(NiWrapper_NiTE PRIVATE "${OPENNI_INCLUDE_DIR}" "${NITE_INCLUDE_DIR}")
+target_include_directories(NiWrapper_NiTE PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/include")
+
 target_link_libraries(NiWrapper_NiTE OpenNI2 NiTE2)

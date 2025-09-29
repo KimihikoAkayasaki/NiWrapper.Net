@@ -1,91 +1,35 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <TargetFrameworks>netstandard2.0</TargetFrameworks>
-    <Version>2.2.0.35</Version>
-    <Company>falahati.net</Company>
-    <Description>.Net Wrapper for OpenNI 2</Description>
-    <Authors>Soroush Falahati</Authors>
-    <Copyright>Copyright © Soroush Falahati 2018 (falahati.net)</Copyright>
-    <Platforms>x64;x86</Platforms>
-    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-    <Product>NiWrapper.Net</Product>
-    <PackageProjectUrl>https://github.com/falahati/NiWrapper.Net</PackageProjectUrl>
-    <PackageLicenseUrl>https://github.com/falahati/NiWrapper.Net/blob/master/LICENSE.txt</PackageLicenseUrl>
-    <IncludeSymbols>true</IncludeSymbols>
-    <IncludeSource>true</IncludeSource>
-    <AssemblyVersion>2.2.0.33</AssemblyVersion>
-    <FileVersion>2.2.0.33</FileVersion>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
-    <Title>NiWrapper.Net x86</Title>
-    <PackageId>NiWrapper.Net.x86</PackageId>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <OutputPath>..\bin\x86_Release</OutputPath>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <Title>NiWrapper.Net x64</Title>
-    <PackageId>NiWrapper.Net.x64</PackageId>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <OutputPath>..\bin\x64_Release</OutputPath>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <OutputPath>..\bin\x64_Debug</OutputPath>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
-    <OutputPath>..\bin\x86_Debug</OutputPath>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-  </PropertyGroup>
-  <ItemGroup>
-    <PackageReference Include="Baseclass.Contrib.Nuget.Output" Version="2.4.3" />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="System.Drawing.Common" Version="4.5.0" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\NiWrapper\NiWrapper.vcxproj">
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
-  </ItemGroup>
+	<PropertyGroup>
+		<TargetFrameworks>netstandard2.0</TargetFrameworks>
+		<Platforms>x64</Platforms>
+		<IncludeSymbols>true</IncludeSymbols>
+		<IncludeSource>true</IncludeSource>
+		<Version>2.2.0.13</Version>
+	</PropertyGroup>
 
-  <ItemGroup Condition="'$(Configuration)'=='Release'">
-    <Content Include="$(OutputPath)OpenNI2\Drivers\Kinect.dll" Link="Output\OpenNI2\Drivers\Kinect.dll">
-      <Pack>true</Pack>
-      <PackagePath>Output\OpenNI2\Drivers\Kinect.dll</PackagePath>
-    </Content>
-    <Content Include="$(OutputPath)OpenNI2\Drivers\OniFile.dll" Link="Output\OpenNI2\Drivers\OniFile.dll">
-      <Pack>true</Pack>
-      <PackagePath>Output\OpenNI2\Drivers\OniFile.dll</PackagePath>
-    </Content>
-    <Content Include="$(OutputPath)OpenNI2\Drivers\PS1080.dll" Link="Output\OpenNI2\Drivers\PS1080.dll">
-      <Pack>true</Pack>
-      <PackagePath>Output\OpenNI2\Drivers\PS1080.dll</PackagePath>
-    </Content>
-    <Content Include="$(OutputPath)OpenNI2\Drivers\PS1080.ini" Link="Output\OpenNI2\Drivers\PS1080.ini">
-      <Pack>true</Pack>
-      <PackagePath>Output\OpenNI2\Drivers\PS1080.ini</PackagePath>
-    </Content>
-    <Content Include="$(OutputPath)OpenNI2\Drivers\PSLink.dll" Link="Output\OpenNI2\Drivers\PSLink.dll">
-      <Pack>true</Pack>
-      <PackagePath>Output\OpenNI2\Drivers\PSLink.dll</PackagePath>
-    </Content>
-    <Content Include="$(OutputPath)OpenNI2\Drivers\PSLink.ini" Link="Output\OpenNI2\Drivers\PSLink.ini">
-      <Pack>true</Pack>
-      <PackagePath>Output\OpenNI2\Drivers\PSLink.ini</PackagePath>
-    </Content>
-    <Content Include="$(OutputPath)OpenNI2.dll" Link="Output\OpenNI2.dll">
-      <Pack>true</Pack>
-      <PackagePath>Output\OpenNI2.dll</PackagePath>
-    </Content>
-    <Content Include="$(OutputPath)OpenNI.ini" Link="Output\OpenNI.ini">
-      <Pack>true</Pack>
-      <PackagePath>Output\OpenNI.ini</PackagePath>
-    </Content>
-    <Content Include="$(OutputPath)\NiWrapper.dll" Link="Output\NiWrapper.dll">
-      <Pack>true</Pack>
-      <PackagePath>Output\NiWrapper.dll</PackagePath>
-    </Content>
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="System.Drawing.Common" Version="9.0.9" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Content Include="$(SolutionDir)vendor\OpenNI\Redist\**\*">
+			<Link>%(RecursiveDir)%(Filename)%(Extension)</Link>
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<Pack>true</Pack>
+			<Visible>false</Visible>
+			<PackagePath>contentFiles\any\any\%(RecursiveDir)%(Filename)%(Extension)</PackagePath>
+			<PackageCopyToOutput>true</PackageCopyToOutput>
+		</Content>
+	</ItemGroup>
+
+	<ItemGroup>
+		<Content Include="$(SolutionDir)NiWrapper\build\NiWrapper.*">
+			<Link>%(RecursiveDir)%(Filename)%(Extension)</Link>
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<Pack>true</Pack>
+			<Visible>false</Visible>
+			<PackagePath>contentFiles\any\any\%(RecursiveDir)%(Filename)%(Extension)</PackagePath>
+			<PackageCopyToOutput>true</PackageCopyToOutput>
+		</Content>
+	</ItemGroup>
 </Project>

@@ -1,28 +1,21 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.12)
 
 project(NiWrapper)
 
-set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH})
-message(-- ${CMAKE_MODULE_PATH})
-find_package(OpenNI2 REQUIRED)
+file(GLOB NIWRAPPER_HDR "include/*.h")
+file(GLOB NIWRAPPER_SRC "src/*.cpp")
 
-set(NIWRAPPER_SRC
-  Array.cpp
-  CameraSettings.cpp
-  Common.cpp
-  CoordinateConverter.cpp
-  Device.cpp
-  DeviceInfo.cpp
-  OpenNI.cpp
-  OpenNI_Listener.cpp
-  PlaybackControl.cpp
-  Recorder.cpp
-  SensorInfo.cpp
-  VideoFrameRef.cpp
-  VideoMode.cpp
-  VideoStream.cpp
-  VideoStream_Listener.cpp
-  )
+# ----------------------- OpenNI -------------------------------
+set(OPENNI_ROOT "${CMAKE_CURRENT_LIST_DIR}/../vendor/OpenNI")
+set(OPENNI_INCLUDE_DIR "${OPENNI_ROOT}/Include")
 
-add_library(NiWrapper SHARED ${NIWRAPPER_SRC})
-target_link_libraries(NiWrapper OpenNI2)
+link_directories("${OPENNI_ROOT}/Lib")
+link_directories("${OPENNI_ROOT}/Redist")
+# --------------------------------------------------------------
+
+add_library(NiWrapper SHARED ${NIWRAPPER_SRC} ${NIWRAPPER_HDR})
+
+target_include_directories(NiWrapper PRIVATE "${OPENNI_INCLUDE_DIR}")
+target_include_directories(NiWrapper PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/include")
+
+target_link_libraries(NiWrapper PRIVATE OpenNI2)
