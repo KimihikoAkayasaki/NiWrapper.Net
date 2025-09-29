@@ -23,7 +23,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Content Include="$(SolutionDir)NiWrapper\build\NiWrapper.*">
+		<Content Include="$(SolutionDir)NiWrapper\build\*NiWrapper.*">
 			<Link>%(RecursiveDir)%(Filename)%(Extension)</Link>
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<Pack>true</Pack>
