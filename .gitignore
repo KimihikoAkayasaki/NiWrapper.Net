@@ -37,3 +37,8 @@ Packages/NuGet
 build/
 *.userprefs
 /Packages/*
+
+.idea/
+.vscode/
+
+NiWrapper_NiTE/.vscode/
