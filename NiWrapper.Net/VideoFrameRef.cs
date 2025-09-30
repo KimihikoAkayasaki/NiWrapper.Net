@@ -18,7 +18,7 @@
 
 using System;
 using System.Drawing;
-using System.Drawing.Imaging;
+using System.Reflection;
 using System.Runtime.InteropServices;
 
 namespace OpenNIWrapper
@@ -48,6 +48,12 @@ namespace OpenNIWrapper
 
             DepthFillShadow = 32
         }
+        public enum FramePixelFormat
+        {
+            Rgb888,
+            Gray8,
+            Gray16
+        }
 
         #endregion
 
@@ -72,6 +78,20 @@ namespace OpenNIWrapper
         private ulong? timestamp;
 
         private VideoMode videoMode;
+
+        private byte[] buffer;
+
+        private GCHandle handle;
+
+        private IntPtr pointer;
+
+        private int stride;
+
+        private int width;
+
+        private int height;
+
+        private FramePixelFormat format;
 
         #endregion
 
@@ -240,103 +260,74 @@ namespace OpenNIWrapper
         #endregion
 
         #region Public Methods and Operators
-
-        public Bitmap ToBitmap(CopyBitmapOptions options = CopyBitmapOptions.None)
+        
+        public (byte[] Buffer, int Width, int Height, FramePixelFormat Format)
+            GetFrame(CopyBitmapOptions options = CopyBitmapOptions.None)
         {
-            PixelFormat format;
+            var newFormat = MapPixelFormat(VideoMode.DataPixelFormat, options);
+            var bytesPerPixel = BytesPerPixel(newFormat);
+            var newStride = FrameSize.Width * bytesPerPixel;
+            var bufferSize = newStride * FrameSize.Height;
 
-            switch (VideoMode.DataPixelFormat)
+            var needsReallocate =
+                buffer == null ||
+                width != FrameSize.Width ||
+                height != FrameSize.Height ||
+                format != newFormat;
+
+            if (needsReallocate)
             {
-                case VideoMode.PixelFormat.Rgb888:
-                    format = PixelFormat.Format24bppRgb;
+                Release();
 
-                    break;
-                case VideoMode.PixelFormat.Gray8:
-                    format = PixelFormat.Format8bppIndexed;
+                buffer = new byte[bufferSize];
+                handle = GCHandle.Alloc(buffer, GCHandleType.Pinned);
+                pointer = handle.AddrOfPinnedObject();
 
-                    break;
-                case VideoMode.PixelFormat.Depth1Mm:
-                case VideoMode.PixelFormat.Depth100Um:
-                case VideoMode.PixelFormat.Gray16:
-                    format = PixelFormat.Format16bppGrayScale;
-
-                    break;
-                default:
-
-                    throw new InvalidOperationException("Pixel format is not acceptable for bitmap converting.");
+                width = FrameSize.Width;
+                height = FrameSize.Height;
+                stride = newStride;
+                format = newFormat;
             }
 
-            if ((options & CopyBitmapOptions.Force24BitRgb) == CopyBitmapOptions.Force24BitRgb)
-            {
-                format = PixelFormat.Format24bppRgb;
-            }
+            // Fill pinned buffer directly
+            VideoFrameRef_copyDataTo(Handle, pointer, stride, options);
 
-            var destination = new Bitmap(FrameSize.Width, FrameSize.Height, format);
-
-            if (format == PixelFormat.Format8bppIndexed)
-            {
-                for (var i = 0; i < 256; i++)
-                {
-                    destination.Palette.Entries[i] = Color.FromArgb(i, i, i);
-                }
-            }
-
-            UpdateBitmap(destination, options);
-
-            return destination;
+            return (buffer!, width, height, format);
         }
 
-        public void UpdateBitmap(Bitmap image, CopyBitmapOptions options = CopyBitmapOptions.None)
+        private static FramePixelFormat MapPixelFormat(VideoMode.PixelFormat fmt, CopyBitmapOptions options)
         {
-            if (image.Width != FrameSize.Width || image.Height != FrameSize.Height)
+            var format = fmt switch
             {
-                throw new ArgumentException("Bitmap size if not acceptable.");
-            }
+                VideoMode.PixelFormat.Rgb888 => FramePixelFormat.Rgb888,
+                VideoMode.PixelFormat.Gray8 => FramePixelFormat.Gray8,
+                VideoMode.PixelFormat.Depth1Mm => FramePixelFormat.Gray16,
+                VideoMode.PixelFormat.Depth100Um => FramePixelFormat.Gray16,
+                VideoMode.PixelFormat.Gray16 => FramePixelFormat.Gray16,
+                _ => throw new InvalidOperationException("Pixel format is not acceptable for frame conversion.")
+            };
 
-            if (image.PixelFormat == PixelFormat.Format24bppRgb)
-            {
-                options |= CopyBitmapOptions.Force24BitRgb;
-            }
-            else if ((options & CopyBitmapOptions.Force24BitRgb) == CopyBitmapOptions.Force24BitRgb)
-            {
-                throw new ArgumentException("Requested RGB888 operation on a non-RGB24 bitmap.");
-            }
+            if ((options & CopyBitmapOptions.Force24BitRgb) == CopyBitmapOptions.Force24BitRgb)
+                format = FramePixelFormat.Rgb888;
 
-            PixelFormat desiredFormat;
+            return format;
+        }
 
-            switch (VideoMode.DataPixelFormat)
-            {
-                case VideoMode.PixelFormat.Rgb888:
-                    desiredFormat = PixelFormat.Format24bppRgb;
+        private static int BytesPerPixel(FramePixelFormat format) => format switch
+        {
+            FramePixelFormat.Rgb888 => 3,
+            FramePixelFormat.Gray8 => 1,
+            FramePixelFormat.Gray16 => 2,
+            _ => throw new ArgumentOutOfRangeException(nameof(format))
+        };
 
-                    break;
-                case VideoMode.PixelFormat.Gray8:
-                    desiredFormat = PixelFormat.Format8bppIndexed;
+        private void Release()
+        {
+            if (handle.IsAllocated)
+                handle.Free();
 
-                    break;
-                case VideoMode.PixelFormat.Depth1Mm:
-                case VideoMode.PixelFormat.Depth100Um:
-                case VideoMode.PixelFormat.Gray16:
-                    desiredFormat = PixelFormat.Format16bppGrayScale;
-
-                    break;
-                default:
-
-                    throw new InvalidOperationException("Pixel format is not acceptable for bitmap converting.");
-            }
-
-            if ((options & CopyBitmapOptions.Force24BitRgb) != CopyBitmapOptions.Force24BitRgb &&
-                desiredFormat != image.PixelFormat)
-            {
-                throw new ArgumentException("Requested bitmap pixel format is not suitable for this data.");
-            }
-
-            var destBits = image.LockBits(
-                new Rectangle(new Point(0, 0), image.Size),
-                ImageLockMode.WriteOnly,
-                image.PixelFormat);
-            VideoFrameRef_copyDataTo(Handle, destBits.Scan0, destBits.Stride, options);
-            image.UnlockBits(destBits);
+            buffer = null;
+            pointer = IntPtr.Zero;
         }
 
         private void ReleaseUnmanagedResources()
@@ -346,6 +337,8 @@ namespace OpenNIWrapper
                 VideoFrameRef_release(Handle);
                 Handle = IntPtr.Zero;
             }
+
+            Release();
         }
 
         /// <inheritdoc />

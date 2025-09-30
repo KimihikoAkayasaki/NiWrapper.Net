@@ -4,7 +4,12 @@
 		<Platforms>x64</Platforms>
 		<IncludeSymbols>true</IncludeSymbols>
 		<IncludeSource>true</IncludeSource>
-		<Version>2.2.0.13</Version>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<PackageId>NiWrapper_NiTE.Net</PackageId>
+		<Version>2.2.0.14</Version>
+		<Authors>KimihikoAkayasaki</Authors>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -17,18 +22,18 @@
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<Pack>true</Pack>
 			<Visible>false</Visible>
-			<PackagePath>contentFiles\any\any\%(RecursiveDir)%(Filename)%(Extension)</PackagePath>
+			<PackagePath>runtimes\any\native\%(RecursiveDir)%(Filename)%(Extension)</PackagePath>
 			<PackageCopyToOutput>true</PackageCopyToOutput>
 		</Content>
 	</ItemGroup>
 
 	<ItemGroup>
-		<Content Include="$(SolutionDir)NiWrapper_NiTE\build\NiWrapper_NiTE.*">
+		<Content Include="$(SolutionDir)NiWrapper_NiTE\build\*NiWrapper_NiTE.*">
 			<Link>%(RecursiveDir)%(Filename)%(Extension)</Link>
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<Pack>true</Pack>
 			<Visible>false</Visible>
-			<PackagePath>contentFiles\any\any\%(RecursiveDir)%(Filename)%(Extension)</PackagePath>
+			<PackagePath>runtimes\any\native\%(RecursiveDir)%(Filename)%(Extension)</PackagePath>
 			<PackageCopyToOutput>true</PackageCopyToOutput>
 		</Content>
 	</ItemGroup>

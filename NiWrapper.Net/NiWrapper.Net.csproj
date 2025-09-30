@@ -4,12 +4,15 @@
 		<Platforms>x64</Platforms>
 		<IncludeSymbols>true</IncludeSymbols>
 		<IncludeSource>true</IncludeSource>
-		<Version>2.2.0.13</Version>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<LangVersion>8</LangVersion>
 	</PropertyGroup>
 
-	<ItemGroup>
-		<PackageReference Include="System.Drawing.Common" Version="9.0.9" />
-	</ItemGroup>
+	<PropertyGroup>
+		<PackageId>NiWrapper.Net</PackageId>
+		<Version>2.2.0.14</Version>
+		<Authors>KimihikoAkayasaki</Authors>
+	</PropertyGroup>
 
 	<ItemGroup>
 		<Content Include="$(SolutionDir)vendor\OpenNI\Redist\**\*">
@@ -17,19 +20,17 @@
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<Pack>true</Pack>
 			<Visible>false</Visible>
-			<PackagePath>contentFiles\any\any\%(RecursiveDir)%(Filename)%(Extension)</PackagePath>
-			<PackageCopyToOutput>true</PackageCopyToOutput>
+			<PackagePath>runtimes\any\native\%(RecursiveDir)%(Filename)%(Extension)</PackagePath>
 		</Content>
 	</ItemGroup>
 
 	<ItemGroup>
-		<Content Include="$(SolutionDir)NiWrapper\build\NiWrapper.*">
+		<Content Include="$(SolutionDir)NiWrapper\build\*NiWrapper.*">
 			<Link>%(RecursiveDir)%(Filename)%(Extension)</Link>
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<Pack>true</Pack>
 			<Visible>false</Visible>
-			<PackagePath>contentFiles\any\any\%(RecursiveDir)%(Filename)%(Extension)</PackagePath>
-			<PackageCopyToOutput>true</PackageCopyToOutput>
+			<PackagePath>runtimes\any\native\%(RecursiveDir)%(Filename)%(Extension)</PackagePath>
 		</Content>
 	</ItemGroup>
 </Project>

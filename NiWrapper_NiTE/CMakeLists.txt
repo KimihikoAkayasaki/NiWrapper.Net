@@ -2,6 +2,15 @@ cmake_minimum_required(VERSION 3.12)
 
 project(NiWrapper_NiTE)
 
+if(MSVC)
+    set(CMAKE_MSVC_RUNTIME_LIBRARY
+        $<$<CONFIG:Debug>:MultiThreadedDebug>      # /MTd
+        $<$<CONFIG:Release>:MultiThreaded>         # /MT
+        $<$<CONFIG:RelWithDebInfo>:MultiThreaded>  # /MT
+        $<$<CONFIG:MinSizeRel>:MultiThreaded>      # /MT
+    )
+endif()
+
 file(GLOB NIWRAPPER_HDR "include/*.h")
 file(GLOB NIWRAPPER_SRC "src/*.cpp")
 
